@@ -3,7 +3,7 @@ import './ProductList.css';
 import CartItem from './CartItem';
 
 // ✅ import from react-redux and CartSlice
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addItem } from './CartSlice';
 
 function ProductList({ onHomeClick }) {
@@ -14,6 +14,14 @@ function ProductList({ onHomeClick }) {
   const [addedToCart, setAddedToCart] = useState({});
 
   const dispatch = useDispatch();
+
+  // ✅ Get cart items from Redux store
+  const cartItems = useSelector(state => state.cart.items);
+
+  // ✅ Calculate total quantity of items in cart
+  const calculateTotalQuantity = () => {
+    return cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+  };
 
   const plantsArray = [
     {
@@ -229,7 +237,7 @@ function ProductList({ onHomeClick }) {
     padding: '15px',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center', // ✅ fixed typo
+    alignItems: 'center',
     fontSize: '20px',
   };
 
@@ -267,12 +275,10 @@ function ProductList({ onHomeClick }) {
     setShowCart(false);
   };
 
-  // ✅ Add to Cart handler for Task 1
+  // ✅ Add to Cart handler
   const handleAddToCart = (plant) => {
-    // send plant to global cart (Redux)
     dispatch(addItem(plant));
 
-    // mark this plant as added in local state
     setAddedToCart((prev) => ({
       ...prev,
       [plant.name]: true,
@@ -300,7 +306,11 @@ function ProductList({ onHomeClick }) {
           <div>
             <a href="#" onClick={handlePlantsClick} style={styleA}>Plants</a>
           </div>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* ✅ Show total quantity next to cart icon */}
+            <span style={{ fontSize: '20px', color: 'white' }}>
+              {calculateTotalQuantity()}
+            </span>
             <a href="#" onClick={handleCartClick} style={styleA}>
               <h1 className="cart">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68">
@@ -325,7 +335,6 @@ function ProductList({ onHomeClick }) {
 
       {!showCart ? (
         <div className="product-grid">
-          {/* ✅ Display all plants here */}
           {plantsArray.map((category) =>
             category.plants.map((plant) => (
               <div
@@ -338,7 +347,6 @@ function ProductList({ onHomeClick }) {
                   className="product-image"
                 />
                 <h3 className="product-name">{plant.name}</h3>
-                {/* optional: show category */}
                 <p className="product-category">{category.category}</p>
                 <p className="product-description">{plant.description}</p>
                 <p className="product-cost">{plant.cost}</p>
